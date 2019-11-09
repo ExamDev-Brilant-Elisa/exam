@@ -1,3 +1,6 @@
+# j'ai fais un code ou un maitre et un bot communique ensemble, le bot envoie le message 'Hello World au serveur
+#je pense que sa t'aidera avec ton code pour la date
+
 import socket as modsocket
 
 def connexion():
