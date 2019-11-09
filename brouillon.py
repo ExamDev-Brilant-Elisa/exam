@@ -19,7 +19,7 @@ print (ddos (date, time))
 
 #récupérer les lignes
 
-def get_log(lines):
+def get_log():
     log_file = open("file","r")
     lines = 0
     for lines in file.readlines():
