@@ -1,3 +1,5 @@
+#en gros ça c'est mon brouillon, j'ai déjà imaginé les fonctions qui pourraient servir de base pour le ddos et le fichier de log
+
 #ddos
 
 import requests
