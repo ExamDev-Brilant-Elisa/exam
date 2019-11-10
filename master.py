@@ -1,5 +1,4 @@
-#master, programme du hackeur, que j'ai assimilé comme étant un serveur. il sait recevoir et envoyer des messages au slave MAIS je n'arrive
-#pas à faire comprendre au slave qu'il doit renvoyer l'heure au serveur
+#master, programme du hackeur, que j'ai assimilé comme étant un serveur. il sait recevoir et envoyer des messages au slave
 import socket
 
 master = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
