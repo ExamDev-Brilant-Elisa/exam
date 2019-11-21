@@ -23,6 +23,43 @@ send_log() ..............
 fais ce qui te plais avec les 2 methodes au dessus a toi de t'amuser :D
 
 """
+
+class Connexion():
+    
+    def __init__(self, machineMaitre, s):
+        self.machineEsclave = machineMaitre
+        self.s = s
+
+    def connexion(self, machineMaitre s):        
+        try:
+            s.listen()
+            conn, addr = s.accept()
+            print("Connection acceptée avec : ", addr[0], " sur le port ", addr[1])
+        #Si le code est arreté par le pc maitre ou celui-ci(je ne sais plus lequel) renvoie le message ci dessous
+        except ConnectionAbortedError:
+            print("Connexion interrompue avec la machine : ", addr)
+        
+    def slave_listen():
+        # adresse du master
+        master_addr = ("localhost", 60000)
+        # création du socket pour que le slave écoute sur un port afin de récupérer les instructions du master
+        slave_listen = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        # écoute sur toutes l'adresse du slave et sur le port 60 000
+        slave_listen.bind(master_addr)
+        # une fois connecté, on le met en écoute et on accepte la connexion afin qu'il reçoive les instruction du master
+        slave_listen.listen()
+        distant_socket, addr = slave_listen.accept()
+        return distant_socket.recv(1024)
+    
+    def slave_sendIP():
+        # adresse du master
+        master_addr = ("localhost", 60000)
+        # création du socket pour que le master envoie des messages au slave
+        slave_sendIP = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        # on définit les coordonnées sur lesquelles le slave va envoyer son adresse ip
+        slave_sendIP.connect(master_addr)
+        print("IP envoyée au master")
+
 class Communication():
 
     def __init__(self, data):
@@ -50,22 +87,7 @@ class Communication():
         data = conn.recv(1024).decode("utf-8")
 
     
-       
-#on choisi la famille AF_NET pour utiliser l'ipv4, en mode TCP
-#on bind grace au nom de la machine sur un port non existant
-s = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-s.bind(("localhost", 5000))
-#on essaye une connexion normale
-try:
-    s.listen()
-    conn, addr = s.accept()
-    print("Connecion acceptée avec : ", addr[0], " sur le port ", addr[1])
-#Si le code est arreté par le pc maitre ou celui-ci(je ne sais plus lequel) renvoie le message ci dessous
-except ConnectionAbortedError:
-    print("Connexion interrompue avec la machine : ", addr)
-
-#on initie le champ data
-data = conn.recv(1024).decode("utf-8")
+      
 #on assigne l'objet communication avec la variable a
 #on est obliger de spécifié le champ data
 a = Communication(data)
