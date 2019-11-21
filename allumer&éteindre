@@ -1,0 +1,19 @@
+#pour le master :
+#une jolie boucle infinie pour garder le master allumé, c'est la manière la plus "propre"
+
+liste_adresses_ip = master_listen()
+print(liste_adresses_ip)
+while True :
+  choix = int(input("Que voulez-vous faire ? 1)Envoyer une message 2)Eteindre le serveur"))
+    if choix == 1:
+      message = str(input("entrez votre message"))
+      master_sendMessages(liste_adresses_ip, message)
+    if choix == 2:
+        break
+
+#pour le slave 
+
+slave_sendIP()
+while True:
+    message = slave_listen()
+    print(message)
