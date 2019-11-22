@@ -3,49 +3,64 @@
 import socket as modSocket
 import argparse
 
-"""
-création de l'objet communication
-avec le champ machineEsclave.
-Création de 2 méthodes connexion et argument
-
-connexion() va permettre d'établire une connexion avec
-une machine esclave
-dans le try: on essaiera d'établire une connexion
-avec une machine distante.
-le except: va print "erreur" si il n'y a pas eu de
-connexion
-
-"""
-class Communication():
-
-    def __init__(self, machineEsclave, s, listeAdresseIP):
+class Connexion():
+    # création de l'objet connexion avec le champ machineEsclave.
+    def __init__(self, machineEsclave, socket, listeAdresseIP):
         self.machineEsclave = machineEsclave
-        self.s = s
+        self.socket = socket
         self.listeAdresseIP = listeAdresseIP
 
-    def connexion(self, s, listeAdresseIP):
-        
+    #1er étape, mettre en place un canal de communication pour recevoir les messages du slave
+    def listen(self):
+        # création du socket pour que le master écoute sur un port afin de récupérer les adresses IP
+        socket_listen = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        # écoute sur toutes les adresses disponibles sur la machine et sur le port 60 000
+        socket_listen.bind(("", 60000))
+        # une fois connecté, on le met en écoute afin qu'il reçoive l'IP du slave; l'IP sera contenue dans addr
+        socket_listen.listen()
+        #va permettre de récupérer notre socket d'écoute
+        return socket_listen
+
+    # 2è étape, mettre en place un canal de communication pour envoyer des messages au slave
+    def receive(self, listeIP):
+        # création du socket pour que le master envoie des messages au slaves via l'adresse IP récupérée
+        socket_sendMessages = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        # on définit les coordonnées sur lesquelles le master va envoyer ses instructions
         try:
-            print(listeAdresseIP)
-            if len(listeAdresseIP) != 0:
-                for adresse in listeAdresseIP:
+            print(listeIP)#est ce vraiment utile ?
+            #si la liste n'est pas vide
+            if len(listeIP) != 0:
+                for adresse in listeIP:
                     machineEsclave = (adresse, 60000)
-                    s.connect(machineEsclave)
-                    print("Connecion établi avec l'esclave")
+                    socket_sendMessages.connect(machineEsclave)
+                    print("Connection établie avec l'esclave")
             else:
                 print("On ne connait pas de machine esclave")
+        #except: va print "erreur" si il n'y a pas eu de connexion
         except ConnectionRefusedError:
             print("Erreur de connexion")
 
-    def ecoute(self, s, listeAdresseIP):
-        s.bind(("", 60000))
-        s.listen()
-        print("j'attend que les slave se connecte")
-        distanSocket, addr = s.accept()
-        distanSocket.recv(1024).decode("utf-8")
-        listeAdresseIP.append(addr[0])
-        print(listeAdresseIP)
-        return listeAdresseIP
+    # 3è étape, mettre en place l'échange de données avec une jolie boucle infinie pour ne pas stopper la connexion
+    def exchange(self, socket_listen):
+        # afin de recevoir l'IP, on accepte de recevoir des données
+        distant_socket, addr = socket_listen.accept
+        # puis on stocke l'IP récupérée dans une liste
+        listeIP = []
+        listeIP.append(addr[O])
+        print ("L'IP du slave est : ", listeIP[0])
+        #on rentre dans notre boucle infinie (c'est le seul moyen)
+        while True:
+            #un petit menu comme on aime
+            choix = int(input("Que voulez-vous faire ? 1)Envoyer une message 2)Eteindre le serveur "))
+            if choix == 1:
+                message = str(input("entrez votre message"))
+                master_sendMessages(liste_adresses_ip, message)
+                if message == "stop":
+                    liste_adresses_ip = master_listen()
+                    print(liste_adresses_ip)
+                    whileTrue()
+            if choix == 2:
+                break
 
 """
 création de l'objet ChoixAction
