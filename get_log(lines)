@@ -1,0 +1,12 @@
+def get_log(lines):
+
+
+    log_file = open('file.txt')
+    file_print = log_file.readlines()
+    
+    nb_lines = 0
+    for line in log_file.readlines():
+        nb_lines = nb_lines+1
+        
+    start = nb_lines-1-lines
+    print (file_print[start:])
