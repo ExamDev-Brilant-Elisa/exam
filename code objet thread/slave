@@ -1,0 +1,38 @@
+import socket as modSocket
+
+
+def slave_listen():
+    # adresse du master
+    master_addr = ("localhost", 60000)
+
+    # création du socket pour que le slave écoute sur un port afin de récupérer les instructions du master
+    slave_listen = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+
+    # écoute sur toutes l'adresse du slave et sur le port 60 000
+    slave_listen.bind(master_addr)
+
+    # une fois connecté, on le met en écoute et on accepte la connexion afin qu'il reçoive les instruction du master
+    slave_listen.listen()
+    distant_socket, addr = slave_listen.accept()
+    return distant_socket.recv(1024).decode("utf-8")
+
+
+def slave_sendIP():
+    # adresse du master
+    master_addr = ("localhost", 60000)
+
+    # création du socket pour que le master envoie des messages au slave
+    slave_sendIP = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+
+    # on définit les coordonnées sur lesquelles le slave va envoyer son adresse ip
+    slave_sendIP.connect(master_addr)
+    print("IP envoyée au master")
+
+slave_sendIP()
+
+while True:
+    message = slave_listen()
+    print(message)
+    if message == "stop" :
+        break
+
