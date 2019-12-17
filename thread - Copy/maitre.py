@@ -41,10 +41,12 @@ class Connexion():
             print("Attente de connexion")
             connReseau, addr = carteReseauEcoute.accept()
             listeIP.append(addr[0])
+            i = 0
             print(listeIP)
-            print ("L'IP du slave est : ", listeIP[0])
+            print ("L'IP du slave est : ", listeIP[i])
+            i+=1
             fichier.write(str(listeIP))       
-            fichier.close()
+            fichier.seek(0)
             thread_ecoute = threading.Thread(target=self.receive, args= (carteReseauConn , port, fichier))
             thread_ecoute.start()
             time.sleep(2)
@@ -59,9 +61,11 @@ class Connexion():
                     carteReseauConn.connect((listeIP[i], port))
                     print("Connection établie avec l'esclave")
                     i+=1
+                    del listeIP[0]
+                    print(listeIP)
                     objetChoixAction.choix(carteReseauConn, carteReseauEcoute)
-            else:
-                print("On ne connait pas de machine esclave")
+
+
         except ConnectionRefusedError:
             print("Erreur de connexion")
 
@@ -121,6 +125,7 @@ class ChoixAction(Connexion):
             except ConnectionAbortedError:
                 print("connexion arretée par le client")
         print("Fin du programme")
+        fichier.close()
         carteReseauConn.send("FIN".encode("utf-8"))
         pass
 
