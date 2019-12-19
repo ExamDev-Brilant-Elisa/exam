@@ -11,6 +11,13 @@ from Crypto.Cipher import AES
 
 crypto = AES.new('This is a key437', AES.MODE_CBC, 'This is an IV916')
 
+thread_log = ""
+carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+chemin = ""
+port = ""
+listener = ""
+objet_action = Action(chemin, listener)
+
 """
 creation de l'objet Connexion, composé de 4 champs et 1 méthodes
 
@@ -147,14 +154,6 @@ class Action(Connexion):
         requete = requests.get(url)
         print("Requête : ", requete.text)
 
-
-thread_log = ""
-carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-chemin = ""
-port = ""
-listener = ""
-objet_action = Action(chemin, listener)
-
 # initiation d'argparse avec les arguments
 parser = argparse.ArgumentParser()
 # creation de la commande --listen
@@ -172,7 +171,3 @@ if args.conn:
     chemin = args.log
     print(chemin)
     objet_action.sendIP(carte_reseau, port)
-
-
-
-
