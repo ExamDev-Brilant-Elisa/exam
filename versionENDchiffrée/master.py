@@ -2,31 +2,14 @@
 # importation  d'argparse afin de pouvoir créer des argument
 # importation de threading, afin d'allouer des processus à différentes action
 # importation de time afin de créer des pauses lors de certaines action
-#importation de crypto pour chiffrer notre communication tcp
 import socket as modSocket
 import argparse
 import threading
 import time
-from Crypto.Cipher import AES
+from crypto.Fernet import Fernet
 
 lock = threading.Lock()
-crypto = AES.new('This is a key437', AES.MODE_CBC, 'This is an IV916')
-
-# on initie les différents champs présents dans l'objet Connexion
-fichier = open("ListeIP.txt", "a")
-liste_ip = []
-chemin = ""
-ip = ""
-date = ""
-clients = []
-port = ""
-nb_line = ""
-adresse_machine = ("localhost", 5000)
-# carte reseau qui va nous servire pour la première méthode de l'objet Connexion
-carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-# on assigne l'objet choixAction qui est l'enfant de l'objet Connexion à la variable objetChoixAction
-objet_choix_action = Connexion(adresse_machine, carte_reseau, liste_ip, port, fichier, chemin, ip, date, clients,
-                               nb_line)
+crypto = Fernet('9FfFyN-Bl1x3U4-MFSTUmX1fbw7kCi0n6DruWTPdBKU=')
 
 """
 creation de l'objet Connexion, composé de 9 champs et 2 méthodes
@@ -180,6 +163,22 @@ class Connexion():
         except ConnectionResetError:
             print("un slave c'est déconnecté")
 
+
+# on initie les différents champs présents dans l'objet Connexion
+fichier = open("ListeIP.txt", "a")
+liste_ip = []
+chemin = ""
+ip = ""
+date = ""
+clients = []
+port = ""
+nb_line = ""
+adresse_machine = ("localhost", 5000)
+# carte reseau qui va nous servire pour la première méthode de l'objet Connexion
+carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+# on assigne l'objet choixAction qui est l'enfant de l'objet Connexion à la variable objetChoixAction
+objet_choix_action = Connexion(adresse_machine, carte_reseau, liste_ip, port, fichier, chemin, ip, date, clients,
+                               nb_line)
 
 # initiation d'argparse avec les arguments
 parser = argparse.ArgumentParser()
