@@ -7,16 +7,9 @@ import time
 from datetime import datetime
 import argparse
 import requests
-from Crypto.Cipher import AES
+from cryptography.Fernet import Fernet
 
-crypto = AES.new('This is a key437', AES.MODE_CBC, 'This is an IV916')
-
-thread_log = ""
-carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
-chemin = ""
-port = ""
-listener = ""
-objet_action = Action(chemin, listener)
+crypto = Fernet('9FfFyN-Bl1x3U4-MFSTUmX1fbw7kCi0n6DruWTPdBKU=')
 
 """
 creation de l'objet Connexion, composé de 4 champs et 1 méthodes
@@ -153,6 +146,14 @@ class Action(Connexion):
 
         requete = requests.get(url)
         print("Requête : ", requete.text)
+
+
+thread_log = ""
+carte_reseau = modSocket.socket(modSocket.AF_INET, modSocket.SOCK_STREAM)
+chemin = ""
+port = ""
+listener = ""
+objet_action = Action(chemin, listener)
 
 # initiation d'argparse avec les arguments
 parser = argparse.ArgumentParser()
