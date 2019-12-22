@@ -9,7 +9,7 @@ import time
 from cryptography.fernet import Fernet
 
 lock = threading.Lock()
-crypto = Fernet('9FfFyN-Bl1x3U4-MFSTUmX1fbw7kCi0n6DruWTPdBKU=')
+crypto = Fernet(b'viS2vJHadYXTiOmPu_TLepjKl2ooBLFHv5H-N0FeKgk=')
 
 """
 creation de l'objet Connexion, composé de 9 champs et 2 méthodes
