@@ -6,7 +6,7 @@ import socket as modSocket
 import argparse
 import threading
 import time
-from crypto.fernet import Fernet
+from cryptography.fernet import Fernet
 
 lock = threading.Lock()
 crypto = Fernet('9FfFyN-Bl1x3U4-MFSTUmX1fbw7kCi0n6DruWTPdBKU=')
